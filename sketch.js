@@ -1,6 +1,8 @@
 class Stack {
     constructor(pos, size) {
         this.color = [random(255), random(255), random(255), random(255)] // rgb
+        let bgcolor = "rgb("+this.color[0]+","+this.color[1]+","+this.color[2]+",0.4)";//rgb to string
+        document.body.style.background=bgcolor; //set body bgcolor sync with active cube in game
         this.position = [...pos] // x, y
         this.size = [...size] // x, y, z
     }
@@ -37,7 +39,7 @@ class Stack {
         pop()
     }
 }
-
+var lost = false;
 const speedPerFrame = 10,
     framePerSec = 60,
     stacks = []
@@ -54,6 +56,9 @@ function setup() {
 
 let move_towards = true
 function draw() {
+    if(!lost)
+    {
+
     background(230)
     play_animations()
 
@@ -69,39 +74,48 @@ function draw() {
 
     for (const s of stacks)
         s.draw()
-
+    }
 }
 
 function keyPressed() {
-    let last_stack = stacks[stacks.length - 1]
-    let posY = last_stack.position[1] - last_stack.size[1]
+    if(!lost)
+    {
 
-    if (stacks.length >= 2) {
-        prelast_stack = stacks[stacks.length - 2]
+        let last_stack = stacks[stacks.length - 1]
+        let posY = last_stack.position[1] - last_stack.size[1]
 
-        let tpu = prelast_stack.top_of_you_size(last_stack)
-        if (tpu === 0)
-            alert('you lost')
+        if (stacks.length >= 2) {
+            prelast_stack = stacks[stacks.length - 2]
 
-        else {
+            let tpu = prelast_stack.top_of_you_size(last_stack)
+            if (tpu === 0)
+            {
+                alert('you lost')
+                lost=true;
+                document.getElementById('retry').style.display="block"; //displaying 'retry' btn
 
-            if (prelast_stack.position[0] < last_stack.position[0])
-                last_stack.position[0] = prelast_stack.position[0] + prelast_stack.size[0] / 2 - tpu / 2
-            else
-                last_stack.position[0] = prelast_stack.position[0] - prelast_stack.size[0] / 2 + tpu / 2
+            }
+
+            else {
+
+                if (prelast_stack.position[0] < last_stack.position[0])
+                    last_stack.position[0] = prelast_stack.position[0] + prelast_stack.size[0] / 2 - tpu / 2
+                else
+                    last_stack.position[0] = prelast_stack.position[0] - prelast_stack.size[0] / 2 + tpu / 2
 
 
-            last_stack.size[0] = tpu
-            last_width = tpu
+                last_stack.size[0] = tpu
+                last_width = tpu
+            }
         }
+        
+        stacks.push(new Stack([last_stack.position[0], posY], [last_width, 30, 10]))
+
+        if (stacks.length > 8)
+            add_animation(() => stacks.map(s => s.position[1] += 1), 30)
+
+        document.getElementById('score').innerHTML = stacks.length - 1
     }
-
-    stacks.push(new Stack([last_stack.position[0], posY], [last_width, 30, 10]))
-
-    if (stacks.length > 8)
-        add_animation(() => stacks.map(s => s.position[1] += 1), 30)
-
-    document.getElementById('score').innerHTML = stacks.length - 1
 }
 
 animations = [] // [{func:, times:}]
@@ -121,3 +135,10 @@ function play_animations() {
 function add_animation(func, times) {
     animations.push({ func, times })
 }
+function retry() //reloading the page start the game 
+{
+    location.reload();
+    document.getElementById('retry').style.display="none";
+
+}
+
