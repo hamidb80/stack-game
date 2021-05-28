@@ -1,10 +1,11 @@
 class Stack {
     constructor(pos, size) {
         this.color = [random(255), random(255), random(255), random(255)] // rgb
-        let bgcolor = "rgb("+this.color[0]+","+this.color[1]+","+this.color[2]+",0.4)";//rgb to string
-        document.body.style.background=bgcolor; //set body bgcolor sync with active cube in game
         this.position = [...pos] // x, y
         this.size = [...size] // x, y, z
+
+        // set background
+        document.body.style.background = "rgb(" + this.color[0] + "," + this.color[1] + "," + this.color[2] + ",0.4)"
     }
 
     top_of_you_size(another_stack) {
@@ -28,8 +29,8 @@ class Stack {
     draw() {
         push()
 
-        strokeWeight(0.5);
-        stroke(0, 0, 0, 0);
+        strokeWeight(0.5)
+        stroke(0, 0, 0, 0)
 
         translate(...this.position)
 
@@ -39,12 +40,15 @@ class Stack {
         pop()
     }
 }
-var lost = false;
-const speedPerFrame = 10,
+
+const
+    speedPerFrame = 10,
     framePerSec = 60,
     stacks = []
 
-let last_width = 300
+let
+    lost = false,
+    last_width = 300
 
 function setup() {
     frameRate(framePerSec)
@@ -56,31 +60,26 @@ function setup() {
 
 let move_towards = true
 function draw() {
-    if(!lost)
-    {
+    if (!lost) {
+        background(230)
+        play_animations()
 
-    background(230)
-    play_animations()
+        let last_stack = stacks[stacks.length - 1]
 
-    let last_stack = stacks[stacks.length - 1]
+        if (move_towards == false && last_stack.position[0] < -width / 2)
+            move_towards = true
 
-    if (move_towards == false && last_stack.position[0] < -width / 2)
-        move_towards = true
+        else if (move_towards == true && last_stack.position[0] > width / 2)
+            move_towards = false
 
-    else if (move_towards == true && last_stack.position[0] > width / 2)
-        move_towards = false
+        last_stack.position[0] += (move_towards ? 1 : -1) * speedPerFrame
 
-    last_stack.position[0] += (move_towards ? 1 : -1) * speedPerFrame
-
-    for (const s of stacks)
-        s.draw()
+        for (const s of stacks)
+            s.draw()
     }
 }
-
 function keyPressed() {
-    if(!lost)
-    {
-
+    if (!lost) {
         let last_stack = stacks[stacks.length - 1]
         let posY = last_stack.position[1] - last_stack.size[1]
 
@@ -88,27 +87,23 @@ function keyPressed() {
             prelast_stack = stacks[stacks.length - 2]
 
             let tpu = prelast_stack.top_of_you_size(last_stack)
-            if (tpu === 0)
-            {
+            if (tpu === 0) {
                 alert('you lost')
-                lost=true;
-                document.getElementById('retry').style.display="block"; //displaying 'retry' btn
-
+                lost = true
+                document.getElementById('retry').style.display = "block" //displaying 'retry' btn
             }
 
             else {
-
                 if (prelast_stack.position[0] < last_stack.position[0])
                     last_stack.position[0] = prelast_stack.position[0] + prelast_stack.size[0] / 2 - tpu / 2
                 else
                     last_stack.position[0] = prelast_stack.position[0] - prelast_stack.size[0] / 2 + tpu / 2
 
-
                 last_stack.size[0] = tpu
                 last_width = tpu
             }
         }
-        
+
         stacks.push(new Stack([last_stack.position[0], posY], [last_width, 30, 10]))
 
         if (stacks.length > 8)
@@ -117,8 +112,9 @@ function keyPressed() {
         document.getElementById('score').innerHTML = stacks.length - 1
     }
 }
+document.body.addEventListener('touchstart', keyPressed)
 
-animations = [] // [{func:, times:}]
+let animations = [] // [{func:, times:}]
 function play_animations() {
     non_zeroes = []
 
@@ -137,8 +133,6 @@ function add_animation(func, times) {
 }
 function retry() //reloading the page start the game 
 {
-    location.reload();
-    document.getElementById('retry').style.display="none";
-
+    location.reload()
+    document.getElementById('retry').style.display = "none"
 }
-
